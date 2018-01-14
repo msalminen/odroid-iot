@@ -52,7 +52,7 @@ public class Mqworker {
     	String url = "jdbc:postgresql://localhost/iot_db?user=postgres";
     	java.sql.Connection conn = DriverManager.getConnection(url);
     	java.sql.Statement stmt = conn.createStatement();
-    	if ()
+    	//if ()
     	String sql = "INSERT INTO TEST (ID,NAME,AGE,ADDRESS,SALARY) "
            + "VALUES (1, 'Paul', 32, 'California', 20000.00 );";
         stmt.executeUpdate(sql);
