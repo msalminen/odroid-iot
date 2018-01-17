@@ -34,10 +34,10 @@ public class Mqtask {
 	  if (message.length() < 1 || topic.length() < 1)
 		  System.out.println(" [x] Empty message or topic");
 	  else {
-
+		  String jsonmsg = "{ \"topic\": \""+topic+"\",\"payload\": {"+message+"}}";
 		  channel.basicPublish( "", TASK_QUEUE_NAME,
 				  MessageProperties.PERSISTENT_TEXT_PLAIN,
-				  message.getBytes());
+				  jsonmsg.getBytes());
 		  System.out.println(" [x] Sent '" + message + "'");
 	  }
 	}

@@ -100,7 +100,11 @@ public class MqttServer implements MqttCallback {
 	
 	    while (!"Bye".equals(inputString)) {
 	    	System.out.println("Bye exists");
+	    	try {
 	    	inputString = scan.nextLine();
+	    	} catch (Exception e) {
+	    		// ignore
+	    	};
 	    }
 
 	    scan.close();
