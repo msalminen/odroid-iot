@@ -38,7 +38,7 @@ public class Mqtask {
 		  channel.basicPublish( "", TASK_QUEUE_NAME,
 				  MessageProperties.PERSISTENT_TEXT_PLAIN,
 				  jsonmsg.getBytes());
-		  System.out.println(" [x] Sent '" + message + "'");
+		  System.out.println(" [x] Sent '" + jsonmsg + "'");
 	  }
 	}
 }

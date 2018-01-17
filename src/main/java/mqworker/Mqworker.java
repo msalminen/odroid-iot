@@ -5,6 +5,9 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.sql.DriverManager;
 //import java.sql.ResultSet;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -52,15 +55,25 @@ public class Mqworker {
 
   private void doWork(String task) throws Exception {
     if (task.length() > 0) {
-        Class.forName("org.postgresql.Driver");
+    	JSONParser jsonParser = new JSONParser();
+    	JSONObject jsonObject = (JSONObject) jsonParser.parse(task);
+    	String topic = (String)jsonObject.get("topic");
+    	JSONObject payload = (JSONObject)jsonObject.get("payload");
+
+    	System.out.println("topic: "+topic);
+    	System.out.println("temp: "+payload.get("temp"));
+
+    	// if(topic)
+    		// do something
+    	// if(payload)
+    		// do something
+    	
+    	Class.forName("org.postgresql.Driver");
     	String url = "jdbc:postgresql://localhost/iot_db?user=postgres";
         java.sql.Connection conn = DriverManager.getConnection(url);
     	java.sql.PreparedStatement pstmt = null;
 
-    	//if ()
-
     	// create table testschema.tempsensor (id integer, time timestamp NOT NULL, value integer);
-
     	String sqlInsert = "INSERT INTO testschema.tempsensor (id,time,value) VALUES (?,?,?)";
     	java.sql.Timestamp sqlTime = new java.sql.Timestamp(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis());
     	pstmt = conn.prepareStatement(sqlInsert);
