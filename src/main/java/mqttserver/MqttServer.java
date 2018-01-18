@@ -20,9 +20,10 @@ public class MqttServer implements MqttCallback {
 	private static Mqtask msgTask;
 
 	private static final String BROKER_URL = "tcp://localhost:1883";
+	private static final String M2MIO_CLIENTID = "1234";
 	private static final String M2MIO_DOMAIN = "odroid";	// mandatory
-	private static final String M2MIO_STUFF = "test";		// mandatory
-	private static final String M2MIO_THING = "1234";		// mandatory
+	private static final String M2MIO_STUFF = "#";			// mandatory
+	private static final String M2MIO_THING = "";			// optional
 	private static final String M2MIO_USERNAME = "";		// optional
 	private static final String M2MIO_PASSWORD_MD5 = "";	// optional
 
@@ -43,7 +44,7 @@ public class MqttServer implements MqttCallback {
 	 */
 	public void connectionLost(Throwable t) {
 		System.out.println("Connection lost!");
-		startServer();
+//		startServer();
 	}
 
 	/**
@@ -116,6 +117,7 @@ public class MqttServer implements MqttCallback {
 		} catch (TimeoutException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	/**
@@ -127,7 +129,7 @@ public class MqttServer implements MqttCallback {
 	 */
 	public void startServer( ) {
 		// setup MQTT Client
-		String clientID = M2MIO_THING;
+		String clientID = M2MIO_CLIENTID;
 		connOpt = new MqttConnectOptions();		
 		connOpt.setCleanSession(true);
 		connOpt.setKeepAliveInterval(30);
@@ -165,7 +167,10 @@ public class MqttServer implements MqttCallback {
 	public void subscribeTopic() {
 		// setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
-		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF + "/" + M2MIO_THING;
+		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF;
+		if (!"".equals(M2MIO_THING)) {
+			myTopic = myTopic + "/" + M2MIO_THING;
+		}
 
 		// subscribe to topic if subscriber
 		if (subscriber) {
@@ -182,7 +187,10 @@ public class MqttServer implements MqttCallback {
 	public void unsubscribeTopic() {
 		// setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
-		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF + "/" + M2MIO_THING;
+		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF;
+		if (!"".equals(M2MIO_THING)) {
+			myTopic = myTopic + "/" + M2MIO_THING;
+		}
 
 		// subscribe to topic if subscriber
 		if (subscriber) {
@@ -197,7 +205,10 @@ public class MqttServer implements MqttCallback {
 
 	public void publishMessage(String aPubMsg) {
 		// publish messages if publisher
-		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF + "/" + M2MIO_THING;
+		String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF;
+		if (!"".equals(M2MIO_THING)) {
+			myTopic = myTopic + "/" + M2MIO_THING;
+		}
 
 		if (publisher) {
 		   		String pubMsg = "{\""+aPubMsg+"\"}";

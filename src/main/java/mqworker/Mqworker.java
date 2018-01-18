@@ -5,9 +5,7 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.sql.DriverManager;
 //import java.sql.ResultSet;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
+import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -55,16 +53,22 @@ public class Mqworker {
 
   private void doWork(String task) throws Exception {
     if (task.length() > 0) {
-    	JSONParser jsonParser = new JSONParser();
-    	JSONObject jsonObject = (JSONObject) jsonParser.parse(task);
-    	String topic = (String)jsonObject.get("topic");
-    	JSONObject payload = (JSONObject)jsonObject.get("payload");
+    	JSONObject jsonObject = new JSONObject(task);
+    	String topic = jsonObject.getString("topic");
+    	JSONObject payload = jsonObject.getJSONObject("payload");
+    	int id = Integer.parseInt(topic.split("/")[2]);
+    	String stuff = topic.split("/")[1];
+    	int value = 0;
 
     	System.out.println("topic: "+topic);
-    	System.out.println("temp: "+payload.get("temp"));
+    	System.out.println("payload: "+payload);
+    	
 
-    	// if(topic)
-    		// do something
+    	if (stuff.equals("temperature")) {
+    		value = payload.getInt("temp");
+    		System.out.println("temp: "+payload.getInt("temp"));
+    	}
+    		
     	// if(payload)
     		// do something
     	
@@ -77,9 +81,9 @@ public class Mqworker {
     	String sqlInsert = "INSERT INTO testschema.tempsensor (id,time,value) VALUES (?,?,?)";
     	java.sql.Timestamp sqlTime = new java.sql.Timestamp(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis());
     	pstmt = conn.prepareStatement(sqlInsert);
-    	pstmt.setInt(1, 1);
+    	pstmt.setInt(1, id);
     	pstmt.setTimestamp(2, sqlTime);
-    	pstmt.setInt(3, 0);
+    	pstmt.setInt(3, value);
     	pstmt.executeUpdate();
 /*
     	java.sql.Statement stmt = conn.createStatement();
