@@ -53,25 +53,35 @@ public class Mqworker {
 
   private void doWork(String task) throws Exception {
     if (task.length() > 0) {
-    	JSONObject jsonObject = new JSONObject(task);
-    	String topic = jsonObject.getString("topic");
-    	JSONObject payload = jsonObject.getJSONObject("payload");
-    	int id = Integer.parseInt(topic.split("/")[2]);
-    	String stuff = topic.split("/")[1];
-    	int value = 0;
+    	int id = 0, value = 0;
+    	String topic = "", stuff = "";
+    	JSONObject jsonObject = null, payload = null;
+
+    	try {
+    		jsonObject = new JSONObject(task);
+    		topic = jsonObject.getString("topic");
+    	    payload = jsonObject.getJSONObject("payload");
+    	} finally {
+
+    	if (topic == null || payload == null) {
+    		throw new org.json.JSONException(" [!] Illegal topic or payload");
+    	}
+
+    	if (topic.split("/").length < 3) {
+    		throw new org.json.JSONException(" [!] Illegal topic");
+    	}
 
     	System.out.println("topic: "+topic);
     	System.out.println("payload: "+payload);
-    	
 
+    	id = Integer.parseInt(topic.split("/")[2]);
+    	stuff = topic.split("/")[1];
+    	
     	if (stuff.equals("temperature")) {
-    		value = payload.getInt("temp");
+   			value = payload.getInt("temp");
     		System.out.println("temp: "+payload.getInt("temp"));
     	}
-    		
-    	// if(payload)
-    		// do something
-    	
+
     	Class.forName("org.postgresql.Driver");
     	String url = "jdbc:postgresql://localhost/iot_db?user=postgres";
         java.sql.Connection conn = DriverManager.getConnection(url);
@@ -107,6 +117,7 @@ public class Mqworker {
  */
         pstmt.close();
         conn.close();
+    	}
     }
   }
 }

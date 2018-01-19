@@ -105,7 +105,7 @@ public class MqttServer implements MqttCallback {
 	    	inputString = scan.nextLine();
 	    	} catch (Exception e) {
 	    		// ignore
-	    	};
+	    	}
 	    }
 
 	    scan.close();
