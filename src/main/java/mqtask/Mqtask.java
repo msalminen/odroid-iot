@@ -22,11 +22,13 @@ public class Mqtask {
 	    connection = factory.newConnection();
 	    channel = connection.createChannel();
 	    channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+	    System.out.println(" [x] Task queue opened");
   }
 
   public void closeTaskQueue() throws IOException, TimeoutException {
 	    channel.close();
-	    connection.close();	  
+	    connection.close();
+	    System.out.println(" [x] Task queue closed");
   }
 
   public void storeMessage(String topic, String message) throws IOException {

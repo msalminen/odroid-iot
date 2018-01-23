@@ -18,6 +18,7 @@ public class MqttServer implements MqttCallback {
 	private MqttAsyncClient myClient;
 	private MqttConnectOptions connOpt;
 	private static Mqtask msgTask;
+	private static Mqworker msgWorker;
 
 	private static final String BROKER_URL = "tcp://localhost:1883";
 	private static final String M2MIO_CLIENTID = "1234";
@@ -86,7 +87,7 @@ public class MqttServer implements MqttCallback {
 	public static void main(String[] args) throws Exception {
 		MqttServer smc = new MqttServer();
 		msgTask = new Mqtask();
-		Mqworker msgWorker = new Mqworker();
+		msgWorker = new Mqworker();
 		Scanner scan = new Scanner(System.in);
 		String inputString = "";
 
@@ -95,29 +96,30 @@ public class MqttServer implements MqttCallback {
 			msgTask.openTaskQueue();
 		} catch (TimeoutException e) {
 			e.printStackTrace();
-		}
-		smc.startServer();
-		smc.subscribeTopic();
-	
-	    while (!"Bye".equals(inputString)) {
-	    	System.out.println("Bye exists");
-	    	try {
-	    	inputString = scan.nextLine();
-	    	} catch (Exception e) {
-	    		// ignore
-	    	}
-	    }
+		} finally {
+			smc.startServer();
+			smc.subscribeTopic();
+		
+		    while (!"Bye".equals(inputString)) {
+		    	System.out.println("Bye exists");
+		    	try {
+		    	inputString = scan.nextLine();
+		    	} catch (Exception e) {
+		    		// ignore
+		    	}
+		    }
 
-	    scan.close();
-	    smc.unsubscribeTopic();
-		smc.stopServer();
-		try {
-			msgTask.closeTaskQueue();
-			msgWorker.closeQueueWorker();
-		} catch (TimeoutException e) {
-			e.printStackTrace();
-		}
+		    scan.close();
+		    smc.unsubscribeTopic();
+			smc.stopServer();
 
+			try {
+				msgTask.closeTaskQueue();
+				msgWorker.closeQueueWorker();
+			} catch (TimeoutException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -157,6 +159,7 @@ public class MqttServer implements MqttCallback {
 		// disconnect
 		try {
 			myClient.disconnect().waitForCompletion();
+			myClient.close();
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}

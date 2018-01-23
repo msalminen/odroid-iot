@@ -25,6 +25,8 @@ public class Mqworker {
     channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
     channel.basicQos(1);
 
+    System.out.println(" [x] Worker queue opened");
+    
     final com.rabbitmq.client.Consumer consumer = new com.rabbitmq.client.DefaultConsumer(channel) {
       @Override
       public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -48,7 +50,8 @@ public class Mqworker {
 
   public void closeQueueWorker() throws Exception {
 	    channel.close();
-	    connection.close();	  
+	    connection.close();
+	    System.out.println(" [x] Worker queue closed");
 }
 
   private void doWork(String task) throws Exception {
@@ -68,7 +71,7 @@ public class Mqworker {
     	}
 
     	if (topic.split("/").length < 3) {
-    		throw new org.json.JSONException(" [!] Illegal topic");
+    		throw new org.json.JSONException(" [!] Topic missing field(s)");
     	}
 
     	System.out.println("topic: "+topic);
@@ -76,25 +79,30 @@ public class Mqworker {
 
     	id = Integer.parseInt(topic.split("/")[2]);
     	stuff = topic.split("/")[1];
-    	
-    	if (stuff.equals("temperature")) {
-   			value = payload.getInt("temp");
-    		System.out.println("temp: "+payload.getInt("temp"));
-    	}
 
     	Class.forName("org.postgresql.Driver");
     	String url = "jdbc:postgresql://localhost/iot_db?user=postgres";
         java.sql.Connection conn = DriverManager.getConnection(url);
     	java.sql.PreparedStatement pstmt = null;
 
-    	// create table testschema.tempsensor (id integer, time timestamp NOT NULL, value integer);
-    	String sqlInsert = "INSERT INTO testschema.tempsensor (id,time,value) VALUES (?,?,?)";
-    	java.sql.Timestamp sqlTime = new java.sql.Timestamp(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis());
-    	pstmt = conn.prepareStatement(sqlInsert);
-    	pstmt.setInt(1, id);
-    	pstmt.setTimestamp(2, sqlTime);
-    	pstmt.setInt(3, value);
-    	pstmt.executeUpdate();
+    	if (stuff.equals("temperature")) {
+    		value = payload.getInt("temp");
+    		System.out.println("temp: "+payload.getInt("temp"));
+
+        	// create table testschema.tempsensor (id integer, time timestamp NOT NULL, value integer);
+        	String sqlInsert = "INSERT INTO testschema.tempsensor (id,time,value) VALUES (?,?,?)";
+        	java.sql.Timestamp sqlTime = new java.sql.Timestamp(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis());
+        	pstmt = conn.prepareStatement(sqlInsert);
+        	pstmt.setInt(1, id);
+        	pstmt.setTimestamp(2, sqlTime);
+        	pstmt.setInt(3, value);
+        	pstmt.executeUpdate();
+    	}
+
+    	if (pstmt != null) {
+    		pstmt.close();
+    	}
+        conn.close();
 /*
     	java.sql.Statement stmt = conn.createStatement();
     	String sqlQuery = "SELECT id, time, value FROM testschema.tempsensor";
@@ -115,8 +123,6 @@ public class Mqworker {
         result.close();
         stmt.close();
  */
-        pstmt.close();
-        conn.close();
     	}
     }
   }
